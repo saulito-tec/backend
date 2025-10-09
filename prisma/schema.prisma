@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model departamento {
+  idDepartamento     Int        @id @default(autoincrement())
+  nombreDepartamento String     @db.VarChar(30)
+  producto           producto[]
+}
+
+model entrada {
+  idEntrada         Int               @id @default(autoincrement())
+  idUsuario_usuario Int
+  fechaEntrada      DateTime          @db.DateTime(0)
+  emisor            String            @db.VarChar(30)
+  compra            Int
+  usuario           usuario           @relation(fields: [idUsuario_usuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "entrada_ibfk_1")
+  entradaProducto   entradaProducto[]
+
+  @@index([idUsuario_usuario], map: "idUsuario_usuario")
+}
+
+model entradaProducto {
+  idEntradaProducto   Int              @id @default(autoincrement())
+  idEntrada_entrada   Int
+  idProducto_producto Int
+  idUnidad_unidad     Int
+  fechaEstimada       Int
+  cantidad            Decimal          @db.Decimal(12, 3)
+  entrada             entrada          @relation(fields: [idEntrada_entrada], references: [idEntrada], onDelete: NoAction, onUpdate: NoAction, map: "entradaProducto_ibfk_1")
+  producto            producto         @relation(fields: [idProducto_producto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "entradaProducto_ibfk_2")
+  unidad              unidad           @relation(fields: [idUnidad_unidad], references: [idUnidad], onDelete: NoAction, onUpdate: NoAction, map: "entradaProducto_ibfk_3")
+  salidaProducto      salidaProducto[]
+
+  @@index([idEntrada_entrada], map: "idEntrada_entrada")
+  @@index([idProducto_producto], map: "idProducto_producto")
+  @@index([idUnidad_unidad], map: "idUnidad_unidad")
+}
+
+model inventario {
+  idInventario        Int      @id
+  idProducto_producto Int
+  cantidadTotal       Decimal  @db.Decimal(12, 3)
+  idUnidad_unidad     Int
+  fechaFinal          DateTime @db.DateTime(0)
+  producto            producto @relation(fields: [idProducto_producto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "inventario_ibfk_1")
+  unidad              unidad   @relation(fields: [idUnidad_unidad], references: [idUnidad], onDelete: NoAction, onUpdate: NoAction, map: "inventario_ibfk_2")
+
+  @@index([idProducto_producto], map: "idProducto_producto")
+  @@index([idUnidad_unidad], map: "idUnidad_unidad")
+}
+
+model logs {
+  idLogs            Int      @id @default(autoincrement())
+  idUsuario_usuario Int
+  fechaLogin        DateTime @db.DateTime(0)
+  fechaLogout       DateTime @db.DateTime(0)
+  usuario           usuario  @relation(fields: [idUsuario_usuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "logs_ibfk_1")
+
+  @@index([idUsuario_usuario], map: "idUsuario_usuario")
+}
+
+model producto {
+  idProducto                  Int               @id @default(autoincrement())
+  nombreProducto              String            @db.VarChar(120)
+  idDepartamento_departamento Int
+  entradaProducto             entradaProducto[]
+  inventario                  inventario[]
+  departamento                departamento      @relation(fields: [idDepartamento_departamento], references: [idDepartamento], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_1")
+
+  @@index([idDepartamento_departamento], map: "idDepartamento_departamento")
+}
+
+model razon {
+  idRazon        Int              @id @default(autoincrement())
+  razon          String           @db.VarChar(50)
+  salidaProducto salidaProducto[]
+}
+
+model salidaProducto {
+  idSalidaProducto                  Int             @id @default(autoincrement())
+  idUsuario_usuario                 Int
+  idEntradaProducto_entradaProducto Int
+  idRazon_razon                     Int
+  fechaSalida                       DateTime        @db.DateTime(0)
+  usuario                           usuario         @relation(fields: [idUsuario_usuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "salidaProducto_ibfk_1")
+  entradaProducto                   entradaProducto @relation(fields: [idEntradaProducto_entradaProducto], references: [idEntradaProducto], onDelete: NoAction, onUpdate: NoAction, map: "salidaProducto_ibfk_2")
+  razon                             razon           @relation(fields: [idRazon_razon], references: [idRazon], onDelete: NoAction, onUpdate: NoAction, map: "salidaProducto_ibfk_3")
+
+  @@index([idEntradaProducto_entradaProducto], map: "idEntradaProducto_entradaProducto")
+  @@index([idRazon_razon], map: "idRazon_razon")
+  @@index([idUsuario_usuario], map: "idUsuario_usuario")
+}
+
+model unidad {
+  idUnidad        Int               @id @default(autoincrement())
+  unidad          String            @db.VarChar(10)
+  entradaProducto entradaProducto[]
+  inventario      inventario[]
+}
+
+model usuario {
+  idUsuario       Int              @id @default(autoincrement())
+  nombreUsuario   String           @db.VarChar(30)
+  apellidoPaterno String           @db.VarChar(30)
+  apellidoMaterno String           @db.VarChar(30)
+  permisoUsuario  Int
+  hashPassword    String           @db.VarChar(256)
+  entrada         entrada[]
+  logs            logs[]
+  salidaProducto  salidaProducto[]
+}

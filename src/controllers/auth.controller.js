@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import pool from "../config/db.js";
+import prisma from "../config/db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -17,19 +17,26 @@ export const login = async (req, res) => {
     }
 
     // Find user by nombreUsuario
-    const [users] = await pool.query(
-      "SELECT idUsuario, nombreUsuario, apellidoPaterno, apellidoMaterno, permisoUsuario, hashPassword FROM usuario WHERE nombreUsuario = ?",
-      [nombreUsuario]
-    );
+    const user = await prisma.usuario.findFirst({
+      where: {
+        nombreUsuario: nombreUsuario
+      },
+      select: {
+        idUsuario: true,
+        nombreUsuario: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+        permisoUsuario: true,
+        hashPassword: true
+      }
+    });
 
-    if (users.length === 0) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: "Credenciales inválidas"
       });
     }
-
-    const user = users[0];
 
     // Compare password
     const isValidPassword = await bcrypt.compare(password, user.hashPassword);
