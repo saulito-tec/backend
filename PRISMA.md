@@ -59,3 +59,10 @@ const nuevoUsuario = await prisma.usuario.create({
 - Ejecutar `npx prisma generate` después de cambios en `schema.prisma`
 - NO subir carpeta `src/generated/prisma/` a Git
 - SÍ subir archivo `prisma/schema.prisma` a Git
+- Cambiar esta linea del schema.prisma a esto:
+```javascript
+  datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+```
