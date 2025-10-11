@@ -6,8 +6,13 @@ import morgan from 'morgan'
 
 import authRoutes from './routes/auth.routes.js'
 // import usuariosRoutes from "./routes/usuarios.routes.js";
+<<<<<<< HEAD
 import productosRoutes from "./routes/productos.routes.js";
 // import inventarioRoutes from "./routes/inventario.routes.js";
+=======
+// import productosRoutes from "./routes/productos.routes.js";
+import inventarioRoutes from "./routes/inventario.routes.js";
+>>>>>>> GH-54
 // import entradasRoutes from "./routes/entradas.routes.js";
 import salidasRoutes from './routes/salidas.routes.js'
 import entradasRoutes from './routes/entradas.routes.js'
@@ -26,8 +31,13 @@ app.use(morgan('dev'))
 
 app.use('/api/auth', authRoutes)
 // app.use("/api/usuarios", usuariosRoutes);
+<<<<<<< HEAD
 app.use("/api/productos", productosRoutes);
 // app.use("/api/inventario", inventarioRoutes);
+=======
+// app.use("/api/productos", productosRoutes);
+app.use("/api/inventario", inventarioRoutes);
+>>>>>>> GH-54
 // app.use("/api/entradas", entradasRoutes);
 app.use('/api/salidas', salidasRoutes)
 app.use('/api/entradas', entradasRoutes)
