@@ -1,4 +1,5 @@
-import prisma from '../config/db.js';
+import prisma from '../config/db.js'
+import bcrypt from 'bcrypt'
 
 const sanitizeUsuario = (u) => ({
   idUsuario: u.idUsuario,
@@ -6,7 +7,7 @@ const sanitizeUsuario = (u) => ({
   apellidoPaterno: u.apellidoPaterno,
   apellidoMaterno: u.apellidoMaterno,
   permisoUsuario: u.permisoUsuario,
-});
+})
 
 export const usuarios = async (req, res) => {
   try {
@@ -18,19 +19,23 @@ export const usuarios = async (req, res) => {
         apellidoMaterno: true,
         permisoUsuario: true,
       },
-    });
-    res.json(data.map(sanitizeUsuario));
+    })
+    res.json(data.map(sanitizeUsuario))
   } catch (error) {
     console.error('Error al obtener los usuarios:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    res
+      .status(500)
+      .json({ success: false, message: 'Error interno del servidor' })
   }
-};
+}
 
 export const usuario = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const u = await prisma.usuario.findFirst({
       where: { idUsuario: Number(id) },
       select: {
@@ -40,48 +45,59 @@ export const usuario = async (req, res) => {
         apellidoMaterno: true,
         permisoUsuario: true,
       },
-    });
+    })
 
     if (!u) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Usuario no encontrado' })
     }
-    res.json(sanitizeUsuario(u));
+    res.json(sanitizeUsuario(u))
   } catch (error) {
     console.error('Error al obtener el usuario:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    res
+      .status(500)
+      .json({ success: false, message: 'Error interno del servidor' })
   }
-};
+}
 
 export const PostUsuario = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
-        success: false, message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      });
+        success: false,
+        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
+      })
     }
     const {
       nombreUsuario,
       apellidoPaterno,
       apellidoMaterno,
       permisoUsuario,
-      hashPassword, 
-    } = req.body;
+      hashPassword,
+    } = req.body
 
     if (
       !nombreUsuario ||
       !apellidoPaterno ||
       !apellidoMaterno ||
-      (permisoUsuario === undefined || permisoUsuario === null) ||
+      permisoUsuario === undefined ||
+      permisoUsuario === null ||
       !hashPassword
     ) {
       return res.status(400).json({
         success: false,
         message:
           'nombreUsuario, apellidoPaterno, apellidoMaterno, permisoUsuario y hashPassword son requeridos',
-      });
+      })
     }
+
+    // Hash the password and store in hashPassword field
+    const hashedPassword = await bcrypt.hash(hashPassword, 10)
 
     const created = await prisma.usuario.create({
       data: {
@@ -89,7 +105,7 @@ export const PostUsuario = async (req, res) => {
         apellidoPaterno,
         apellidoMaterno,
         permisoUsuario: Number(permisoUsuario),
-        hashPassword, 
+        hashPassword: hashedPassword, // Use the hashed password
       },
       select: {
         idUsuario: true,
@@ -98,49 +114,55 @@ export const PostUsuario = async (req, res) => {
         apellidoMaterno: true,
         permisoUsuario: true,
       },
-    });
+    })
 
     res.status(201).json({
       success: true,
       message: 'Usuario creado exitosamente',
       usuario: sanitizeUsuario(created),
-    });
+    })
   } catch (error) {
     console.error('Error al crear el usuario:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    res
+      .status(500)
+      .json({ success: false, message: 'Error interno del servidor' })
   }
-};
+}
 
 export const PutUsuario = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
-        success: false, message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      });
+        success: false,
+        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
+      })
     }
-    const { id } = req.params;
+    const { id } = req.params
     const {
       nombreUsuario,
       apellidoPaterno,
       apellidoMaterno,
       permisoUsuario,
       hashPassword, // opcional en update
-    } = req.body;
+    } = req.body
 
     if (
       !id ||
       !nombreUsuario ||
       !apellidoPaterno ||
       !apellidoMaterno ||
-      (permisoUsuario === undefined || permisoUsuario === null)
+      permisoUsuario === undefined ||
+      permisoUsuario === null
     ) {
       return res.status(400).json({
         success: false,
         message:
           'id, nombreUsuario, apellidoPaterno, apellidoMaterno y permisoUsuario son requeridos',
-      });
+      })
     }
 
     const dataToUpdate = {
@@ -148,8 +170,12 @@ export const PutUsuario = async (req, res) => {
       apellidoPaterno,
       apellidoMaterno,
       permisoUsuario: Number(permisoUsuario),
-    };
-    if (hashPassword) dataToUpdate.hashPassword = hashPassword;
+    }
+
+    // Hash password if provided and store in hashedPassword field
+    if (hashPassword) {
+      dataToUpdate.hashedPassword = await bcrypt.hash(password, 10)
+    }
 
     const updated = await prisma.usuario.update({
       where: { idUsuario: Number(id) },
@@ -161,64 +187,57 @@ export const PutUsuario = async (req, res) => {
         apellidoMaterno: true,
         permisoUsuario: true,
       },
-    });
+    })
 
     res.status(200).json({
       success: true,
       message: 'Usuario actualizado exitosamente',
       usuario: sanitizeUsuario(updated),
-    });
+    })
   } catch (error) {
     if (error?.code === 'P2025') {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Usuario no encontrado' })
     }
     console.error('Error al actualizar el usuario:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    res
+      .status(500)
+      .json({ success: false, message: 'Error interno del servidor' })
   }
-};
+}
 
 export const DeleteUsuario = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     if (!id) {
-      return res.status(400).json({ success: false, message: 'idUsuario es requerido' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'idUsuario es requerido' })
     }
 
-    await prisma.usuario.delete({ where: { idUsuario: Number(id) } });
+    await prisma.usuario.delete({ where: { idUsuario: Number(id) } })
 
-    res.status(200).json({ success: true, message: 'Usuario eliminado exitosamente' });
+    res
+      .status(200)
+      .json({ success: true, message: 'Usuario eliminado exitosamente' })
   } catch (error) {
     if (error?.code === 'P2025') {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Usuario no encontrado' })
     }
     console.error('Error al eliminar el usuario:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    })
+    res
+      .status(500)
+      .json({ success: false, message: 'Error interno del servidor' })
   }
-
-};
-
-export const PostUsuarioSignIn = async (req, res) => {
-  try {
-    const { nombreUsuario, hashPassword } = req.body || {};
-    if (!nombreUsuario || !hashPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'nombreUsuario y hashPassword son requeridos',
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      message: 'OK',
-    });
-  } catch (error) {
-    console.error('Error en auth de usuario:', {
-      message: error.message, code: error.code, meta: error.meta,
-    });
-    return res.status(500).json({ success: false, message: 'Error interno del servidor' });
-  }
-};
-
+}

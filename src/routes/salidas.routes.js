@@ -1,14 +1,14 @@
-import { Router } from "express";
+import { Router } from 'express'
 import {
   getAllSalidas,
   getSalidaById,
-  createSalida
-} from "../controllers/salidas.controller.js"; 
+  createSalida,
+} from '../controllers/salidas.controller.js'
 
-const router = Router();
+const router = Router()
 
-router.get("/", getAllSalidas);
-router.get("/:id", getSalidaById);
-router.post("/", createSalida);
+router.get('/', getAllSalidas)
+router.get('/:id', getSalidaById)
+router.post('/', createSalida)
 
-export default router;
+export default router

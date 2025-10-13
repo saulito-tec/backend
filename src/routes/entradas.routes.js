@@ -1,15 +1,19 @@
-import { Router } from "express";
-import { entradaID, entradas, crearEntrada } from "../controllers/entradas.controller.js";
+import { Router } from 'express'
+import {
+  entradaID,
+  entradas,
+  crearEntrada,
+} from '../controllers/entradas.controller.js'
 
-const router = Router();
+const router = Router()
 
 // GET /api/entradas
-router.get("/", entradas);
+router.get('/', entradas)
 
 // GET /api/entradas/:id
-router.get("/:id", entradaID);
+router.get('/:id', entradaID)
 
 // POST /api/entradas
-router.post("/", crearEntrada);
+router.post('/', crearEntrada)
 
-export default router;
+export default router

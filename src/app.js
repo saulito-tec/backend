@@ -10,7 +10,7 @@ import productosRoutes from './routes/productos.routes.js'
 import inventarioRoutes from './routes/inventario.routes.js'
 import salidasRoutes from './routes/salidas.routes.js'
 import entradasRoutes from './routes/entradas.routes.js'
-import reportesRoutes from './routes/reportes.routes.js'
+// import reportesRoutes from './routes/reportes.routes.js'
 
 const app = express()
 
@@ -28,7 +28,7 @@ app.use('/api/productos', productosRoutes)
 app.use('/api/inventario', inventarioRoutes)
 app.use('/api/salidas', salidasRoutes)
 app.use('/api/entradas', entradasRoutes)
-app.use('/api/reportes', reportesRoutes)
+// app.use('/api/reportes', reportesRoutes)
 
 // Ruta base de prueba
 app.get('/', (req, res) => {
