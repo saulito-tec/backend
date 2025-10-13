@@ -1,7 +1,7 @@
 import prisma from '../config/db.js'
 
 // GET /api/inventario
-export const getInventario = async (req, res) => {
+export const getAllInventario = async (req, res) => {
   try {
     const inventario = await prisma.inventario.findMany({
       select: {
@@ -57,7 +57,7 @@ export const getInventarioById = async (req, res) => {
 }
 
 // PUT /api/inventario/:id
-export const updateInventarioById = async (req, res) => {
+export const updateInventario = async (req, res) => {
   try {
     const { id } = req.params
     const { idProducto_producto, cantidadTotal, idUnidad_unidad, fechaFinal } =

@@ -1,6 +1,6 @@
 import prisma from '../config/db.js'
 
-export const productos = async (req, res) => {
+export const getAllProductos = async (req, res) => {
   try {
     const productos = await prisma.producto.findMany({
       select: {
@@ -26,7 +26,7 @@ export const productos = async (req, res) => {
   }
 }
 
-export const producto = async (req, res) => {
+export const getProductoById = async (req, res) => {
   try {
     const { id } = req.params
     const producto = await prisma.producto.findFirst({
@@ -55,7 +55,7 @@ export const producto = async (req, res) => {
   }
 }
 
-export const Postproducto = async (req, res) => {
+export const createProducto = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
@@ -92,7 +92,7 @@ export const Postproducto = async (req, res) => {
   }
 }
 
-export const PutProducto = async (req, res) => {
+export const updateProducto = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
@@ -131,7 +131,7 @@ export const PutProducto = async (req, res) => {
   }
 }
 
-export const DeleteProducto = async (req, res) => {
+export const deleteProducto = async (req, res) => {
   try {
     const { id } = req.params
     if (!id) {

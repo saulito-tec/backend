@@ -9,7 +9,7 @@ const sanitizeUsuario = (u) => ({
   permisoUsuario: u.permisoUsuario,
 })
 
-export const usuarios = async (req, res) => {
+export const getAllUsuarios = async (req, res) => {
   try {
     const data = await prisma.usuario.findMany({
       select: {
@@ -33,7 +33,7 @@ export const usuarios = async (req, res) => {
   }
 }
 
-export const usuario = async (req, res) => {
+export const getUsuarioById = async (req, res) => {
   try {
     const { id } = req.params
     const u = await prisma.usuario.findFirst({
@@ -65,7 +65,7 @@ export const usuario = async (req, res) => {
   }
 }
 
-export const PostUsuario = async (req, res) => {
+export const createUsuario = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
@@ -133,7 +133,7 @@ export const PostUsuario = async (req, res) => {
   }
 }
 
-export const PutUsuario = async (req, res) => {
+export const updateUsuario = async (req, res) => {
   try {
     if (!req.body) {
       return res.status(400).json({
@@ -172,9 +172,9 @@ export const PutUsuario = async (req, res) => {
       permisoUsuario: Number(permisoUsuario),
     }
 
-    // Hash password if provided and store in hashedPassword field
+    // Hash password if provided and store in hashPassword field AGUASSSS
     if (hashPassword) {
-      dataToUpdate.hashedPassword = await bcrypt.hash(password, 10)
+      dataToUpdate.hashPassword = await bcrypt.hash(hashPassword, 10)
     }
 
     const updated = await prisma.usuario.update({
@@ -211,7 +211,7 @@ export const PutUsuario = async (req, res) => {
   }
 }
 
-export const DeleteUsuario = async (req, res) => {
+export const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params
     if (!id) {

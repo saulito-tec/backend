@@ -1,19 +1,19 @@
 import { Router } from 'express'
 import {
-  entradaID,
-  entradas,
-  crearEntrada,
+  getEntradaById,
+  getAllEntradas,
+  createEntrada,
 } from '../controllers/entradas.controller.js'
 
 const router = Router()
 
 // GET /api/entradas
-router.get('/', entradas)
+router.get('/', getAllEntradas)
 
 // GET /api/entradas/:id
-router.get('/:id', entradaID)
+router.get('/:id', getEntradaById)
 
 // POST /api/entradas
-router.post('/', crearEntrada)
+router.post('/', createEntrada)
 
 export default router

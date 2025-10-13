@@ -1,6 +1,6 @@
 import prisma from '../config/db.js'
 
-export const entradas = async (req, res) => {
+export const getAllEntradas = async (req, res) => {
   try {
     const entradas = await prisma.entrada.findMany()
 
@@ -16,7 +16,7 @@ export const entradas = async (req, res) => {
   }
 }
 
-export const entradaID = async (req, res) => {
+export const getEntradaById = async (req, res) => {
   try {
     const { id } = req.params
 
@@ -46,7 +46,7 @@ export const entradaID = async (req, res) => {
   }
 }
 
-export const crearEntrada = async (req, res) => {
+export const createEntrada = async (req, res) => {
   try {
     const { idUsuario_usuario, fechaEntrada, emisor, compra } = req.body
 

@@ -1,19 +1,19 @@
 import { Router } from 'express'
 import {
-  getInventario,
+  getAllInventario,
   getInventarioById,
-  updateInventarioById,
+  updateInventario,
 } from '../controllers/inventario.controller.js'
 
 const router = Router()
 
 // GET /api/inventario
-router.get('/', getInventario)
+router.get('/', getAllInventario)
 
 // GET /api/inventario/:id
 router.get('/:id', getInventarioById)
 
 // PUT /api/inventario/:id
-router.put('/:id', updateInventarioById)
+router.put('/:id', updateInventario)
 
 export default router

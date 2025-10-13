@@ -1,26 +1,26 @@
 import { Router } from 'express'
 import {
-  productos,
-  producto,
-  Postproducto,
-  PutProducto,
-  DeleteProducto,
+  getAllProductos,
+  getProductoById,
+  createProducto,
+  updateProducto,
+  deleteProducto,
 } from '../controllers/productos.controller.js'
 
 const router = Router()
 
 // GET /api/productos
-router.get('/', productos)
+router.get('/', getAllProductos)
 // GET /api/productos/:id
-router.get('/:id', producto)
+router.get('/:id', getProductoById)
 
 // POST /api/productos
-router.post('/', Postproducto)
+router.post('/', createProducto)
 
 // PUT /api/productos/:id
-router.put('/:id', PutProducto)
+router.put('/:id', updateProducto)
 
 // DELETE /api/productos/:id
-router.delete('/:id', DeleteProducto)
+router.delete('/:id', deleteProducto)
 
 export default router
