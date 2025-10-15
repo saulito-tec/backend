@@ -1,10 +1,16 @@
-import prisma from '../config/db.js'
+import {
+  CrearEntrada,
+  ObtenerEntradaPorId,
+  ObtenerEntradas,
+} from '../services/entradaService.ts'
 
 export const getAllEntradas = async (req, res) => {
   try {
-    const entradas = await prisma.entrada.findMany()
+    const entradas = await ObtenerEntradas()
 
-    res.json({
+    res.status(200).json({
+      success: true,
+      count: entradas.length,
       data: entradas,
     })
   } catch (error) {
@@ -18,13 +24,9 @@ export const getAllEntradas = async (req, res) => {
 
 export const getEntradaById = async (req, res) => {
   try {
-    const { id } = req.params
+    const idEntrada = parseInt(req.params.id)
 
-    const idEntrada = parseInt(id)
-
-    const entrada = await prisma.entrada.findFirst({
-      where: { idEntrada: idEntrada },
-    })
+    const entrada = await ObtenerEntradaPorId(idEntrada)
 
     if (!entrada) {
       return res.status(404).json({
@@ -33,7 +35,7 @@ export const getEntradaById = async (req, res) => {
       })
     }
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: entrada,
     })
@@ -48,24 +50,38 @@ export const getEntradaById = async (req, res) => {
 
 export const createEntrada = async (req, res) => {
   try {
-    const { idUsuario_usuario, fechaEntrada, emisor, compra } = req.body
+    const { idUsuario_usuario, fechaEntrada, emisor, compra, productos } =
+      req.body
 
-    const nuevaEntrada = await prisma.entrada.create({
-      data: {
-        idUsuario_usuario,
-        fechaEntrada: new Date(fechaEntrada),
-        emisor,
-        compra,
-      },
+    const entrada = {
+      idUsuario: idUsuario_usuario,
+      fechaEntrada: new Date(fechaEntrada),
+      emisor,
+      compra,
+    }
+
+    const productosEntrada = productos.map((p) => ({
+      idEntrada: 0,
+      idProducto: p.idProducto,
+      idUnidad: p.idUnidad,
+      fechaEstimada: new Date(p.fechaEstimada),
+      cantidad: Number(p.cantidad),
+    }))
+
+    const nuevaEntrada = await CrearEntrada({
+      entrada,
+      productos: productosEntrada,
     })
 
     res.status(201).json({
       success: true,
+      message: 'Entrada creada correctamente',
       data: nuevaEntrada,
     })
   } catch (error) {
     console.error('Error al crear la entrada:', error)
     res.status(500).json({
+      success: false,
       message: 'Error interno del servidor',
     })
   }

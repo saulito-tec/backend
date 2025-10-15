@@ -31,7 +31,7 @@ model entradaProducto {
   idEntrada_entrada   Int
   idProducto_producto Int
   idUnidad_unidad     Int
-  fechaEstimada       Int
+  fechaEstimada       DateTime         @db.DateTime(0)
   cantidad            Decimal          @db.Decimal(12, 3)
   entrada             entrada          @relation(fields: [idEntrada_entrada], references: [idEntrada], onDelete: NoAction, onUpdate: NoAction, map: "entradaProducto_ibfk_1")
   producto            producto         @relation(fields: [idProducto_producto], references: [idProducto], onDelete: NoAction, onUpdate: NoAction, map: "entradaProducto_ibfk_2")
@@ -44,7 +44,7 @@ model entradaProducto {
 }
 
 model inventario {
-  idInventario        Int      @id
+  idInventario        Int      @id @default(autoincrement())
   idProducto_producto Int
   cantidadTotal       Decimal  @db.Decimal(12, 3)
   idUnidad_unidad     Int
