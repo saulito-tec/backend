@@ -1,22 +1,27 @@
-import prisma from '../config/db.js'
+import {
+  getAllProductosService,
+  getProductoByIdService,
+  createProductoService,
+  updateProductoService,
+  deleteProductoService,
+} from '../services/productoService.ts'
 
 export const getAllProductos = async (req, res) => {
   try {
-    const productos = await prisma.producto.findMany({
-      select: {
-        idProducto: true,
-        nombreProducto: true,
-        idDepartamento_departamento: true,
-      },
-    })
-    if (!productos) {
+    const productos = await getAllProductosService()
+
+    if (!productos || productos.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado',
+        message: 'No se encontraron productos',
       })
     }
 
-    res.json(productos)
+    res.status(200).json({
+      success: true,
+      count: productos.length,
+      data: productos,
+    })
   } catch (error) {
     console.error('Error al obtener los productos:', error)
     res.status(500).json({
@@ -28,15 +33,8 @@ export const getAllProductos = async (req, res) => {
 
 export const getProductoById = async (req, res) => {
   try {
-    const { id } = req.params
-    const producto = await prisma.producto.findFirst({
-      select: {
-        idProducto: true,
-        nombreProducto: true,
-        idDepartamento_departamento: true,
-      },
-      where: { idProducto: Number(id) },
-    })
+    const id = parseInt(req.params.id)
+    const producto = await getProductoByIdService(id)
 
     if (!producto) {
       return res.status(404).json({
@@ -45,7 +43,10 @@ export const getProductoById = async (req, res) => {
       })
     }
 
-    res.json(producto)
+    res.status(200).json({
+      success: true,
+      data: producto,
+    })
   } catch (error) {
     console.error('Error al obtener el producto:', error)
     res.status(500).json({
@@ -57,34 +58,27 @@ export const getProductoById = async (req, res) => {
 
 export const createProducto = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      })
-    }
     const { nombreProducto, idDepartamento_departamento } = req.body
 
     if (!nombreProducto || !idDepartamento_departamento) {
       return res.status(400).json({
         success: false,
-        message: 'Nombre de producto e idDepartamento son requeridos',
+        message: 'nombreProducto e idDepartamento_departamento son requeridos',
       })
     }
-    const producto = await prisma.producto.create({
-      data: {
-        nombreProducto,
-        idDepartamento_departamento,
-      },
+
+    const producto = await createProductoService({
+      nombreProducto,
+      idDepartamento_departamento,
     })
 
     res.status(201).json({
       success: true,
       message: 'Producto creado exitosamente',
-      producto,
+      data: producto,
     })
   } catch (error) {
-    console.error('Error al obtener el producto:', error)
+    console.error('Error al crear el producto:', error)
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
@@ -94,13 +88,7 @@ export const createProducto = async (req, res) => {
 
 export const updateProducto = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      })
-    }
-    const { id } = req.params
+    const id = parseInt(req.params.id)
     const { nombreProducto, idDepartamento_departamento } = req.body
 
     if (!id || !nombreProducto || !idDepartamento_departamento) {
@@ -110,20 +98,19 @@ export const updateProducto = async (req, res) => {
           'idProducto, nombreProducto e idDepartamento_departamento son requeridos',
       })
     }
-    const producto = await prisma.producto.update({
-      where: { idProducto: Number(id) },
-      data: {
-        nombreProducto,
-        idDepartamento_departamento,
-      },
+
+    const producto = await updateProductoService(id, {
+      nombreProducto,
+      idDepartamento_departamento,
     })
 
     res.status(200).json({
       success: true,
       message: 'Producto actualizado exitosamente',
-      producto,
+      data: producto,
     })
   } catch (error) {
+    console.error('Error al actualizar el producto:', error)
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
@@ -133,21 +120,22 @@ export const updateProducto = async (req, res) => {
 
 export const deleteProducto = async (req, res) => {
   try {
-    const { id } = req.params
+    const id = parseInt(req.params.id)
     if (!id) {
       return res.status(400).json({
         success: false,
         message: 'idProducto es requerido',
       })
     }
-    await prisma.producto.delete({
-      where: { idProducto: Number(id) },
-    })
+
+    await deleteProductoService(id)
+
     res.status(200).json({
       success: true,
       message: 'Producto eliminado exitosamente',
     })
   } catch (error) {
+    console.error('Error al eliminar el producto:', error)
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
