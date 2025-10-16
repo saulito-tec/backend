@@ -3,8 +3,11 @@ import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
+/**
+ * Este archivo nomas fue un seed para poular la bdd con usuarios y productos para poder crear una entrada/salida
+ */
+
 async function main() {
-  // 1️⃣ Usuario mock
   const hashedPassword = await bcrypt.hash('admin123', 10)
   const usuario = await prisma.usuario.create({
     data: {
@@ -16,14 +19,12 @@ async function main() {
     },
   })
 
-  // 2️⃣ Departamento mock
   const departamento = await prisma.departamento.create({
     data: {
       nombreDepartamento: 'Alimentos',
     },
   })
 
-  // 3️⃣ Unidades mock
   const unidad = await prisma.unidad.create({
     data: {
       unidad: 'kg',
@@ -36,7 +37,6 @@ async function main() {
     },
   })
 
-  // 4️⃣ Productos mock
   const producto1 = await prisma.producto.create({
     data: {
       nombreProducto: 'Arroz',
@@ -51,7 +51,6 @@ async function main() {
     },
   })
 
-  console.log('✅ Datos de prueba insertados:')
   console.log({
     usuario,
     departamento,
@@ -65,6 +64,6 @@ async function main() {
 main()
   .then(() => prisma.$disconnect())
   .catch((err) => {
-    console.error('❌ Error insertando datos mock:', err)
+    console.error('err insertando mock:', err)
     prisma.$disconnect()
   })
