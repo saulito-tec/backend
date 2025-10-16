@@ -1,19 +1,17 @@
-import prisma from '../config/db.js'
+import {
+  getAllInventarioService,
+  getInventarioByIdService,
+  updateInventarioService,
+} from '../services/inventarioService.ts'
 
-// GET /api/inventario
 export const getAllInventario = async (req, res) => {
   try {
-    const inventario = await prisma.inventario.findMany({
-      select: {
-        idInventario: true,
-        idProducto_producto: true,
-        cantidadTotal: true,
-        idUnidad_unidad: true,
-        fechaFinal: true,
-      },
+    const inventario = await getAllInventarioService()
+    res.status(200).json({
+      success: true,
+      count: inventario.length,
+      data: inventario,
     })
-
-    res.json(inventario)
   } catch (error) {
     console.error('Error al obtener el inventario:', error)
     res.status(500).json({
@@ -23,21 +21,10 @@ export const getAllInventario = async (req, res) => {
   }
 }
 
-// GET /api/inventario/:id
 export const getInventarioById = async (req, res) => {
   try {
-    const { id } = req.params
-
-    const inventario = await prisma.inventario.findUnique({
-      where: { idInventario: Number(id) },
-      select: {
-        idInventario: true,
-        idProducto_producto: true,
-        cantidadTotal: true,
-        idUnidad_unidad: true,
-        fechaFinal: true,
-      },
-    })
+    const id = parseInt(req.params.id)
+    const inventario = await getInventarioByIdService(id)
 
     if (!inventario) {
       return res.status(404).json({
@@ -46,7 +33,10 @@ export const getInventarioById = async (req, res) => {
       })
     }
 
-    res.json(inventario)
+    res.status(200).json({
+      success: true,
+      data: inventario,
+    })
   } catch (error) {
     console.error('Error al obtener el inventario por ID:', error)
     res.status(500).json({
@@ -56,10 +46,9 @@ export const getInventarioById = async (req, res) => {
   }
 }
 
-// PUT /api/inventario/:id
 export const updateInventario = async (req, res) => {
   try {
-    const { id } = req.params
+    const id = parseInt(req.params.id)
     const { idProducto_producto, cantidadTotal, idUnidad_unidad, fechaFinal } =
       req.body
 
@@ -75,17 +64,18 @@ export const updateInventario = async (req, res) => {
       })
     }
 
-    const updated = await prisma.inventario.update({
-      where: { idInventario: Number(id) },
-      data: {
-        idProducto_producto,
-        cantidadTotal,
-        idUnidad_unidad,
-        fechaFinal,
-      },
+    const updated = await updateInventarioService(id, {
+      idProducto_producto,
+      cantidadTotal: Number(cantidadTotal),
+      idUnidad_unidad,
+      fechaFinal: new Date(fechaFinal),
     })
 
-    res.json(updated)
+    res.status(200).json({
+      success: true,
+      message: 'Inventario actualizado correctamente',
+      data: updated,
+    })
   } catch (error) {
     console.error('Error al actualizar el inventario:', error)
     res.status(500).json({
