@@ -1,36 +1,42 @@
-import prisma from '../config/db.js'
+import {
+  CrearSalida,
+  ObtenerSalidas,
+  ObtenerSalidaPorId,
+} from '../services/salidaService.ts'
 
-// Obtener todas las salidas
 export const getAllSalidas = async (req, res) => {
   try {
-    const salidas = await prisma.salidaProducto.findMany()
-    res.status(200).json(salidas)
+    const salidas = await ObtenerSalidas()
+    res.json({ success: true, data: salidas })
   } catch (error) {
     console.error('Error al obtener salidas:', error)
-    res.status(500).json({ error: 'Error al obtener las salidas' })
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    })
   }
 }
 
-// Obtener una salida por ID
 export const getSalidaById = async (req, res) => {
   try {
-    const { id } = req.params
-    const salida = await prisma.salidaProducto.findUnique({
-      where: { idSalidaProducto: parseInt(id) },
-    })
+    const id = Number(req.params.id)
+    const salida = await ObtenerSalidaPorId(id)
 
-    if (!salida) {
-      return res.status(404).json({ message: 'Salida no encontrada' })
-    }
+    if (!salida)
+      return res
+        .status(404)
+        .json({ success: false, message: 'Salida no encontrada' })
 
-    res.status(200).json(salida)
+    res.json({ success: true, data: salida })
   } catch (error) {
     console.error('Error al obtener salida:', error)
-    res.status(500).json({ error: 'Error al obtener la salida' })
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    })
   }
 }
 
-// Crear una nueva salida
 export const createSalida = async (req, res) => {
   try {
     const {
@@ -38,42 +44,29 @@ export const createSalida = async (req, res) => {
       idEntradaProducto_entradaProducto,
       idRazon_razon,
       fechaSalida,
+      cantidadSalida,
     } = req.body
 
-    // Validaciones
-    if (
-      !idUsuario_usuario ||
-      !idEntradaProducto_entradaProducto ||
-      !idRazon_razon ||
-      !fechaSalida
-    ) {
-      return res.status(400).json({
-        message:
-          'Faltan datos obligatorios (idUsuario_usuario, idEntradaProducto_entradaProducto, idRazon_razon, fechaSalida)',
-      })
-    }
-
-    const nuevaSalida = await prisma.salidaProducto.create({
-      data: {
-        idUsuario_usuario: parseInt(idUsuario_usuario),
-        idEntradaProducto_entradaProducto: parseInt(
-          idEntradaProducto_entradaProducto
-        ),
-        idRazon_razon: parseInt(idRazon_razon),
-        fechaSalida: new Date(fechaSalida),
-      },
+    const nuevaSalida = await CrearSalida({
+      idUsuario_usuario: Number(idUsuario_usuario),
+      idEntradaProducto_entradaProducto: Number(
+        idEntradaProducto_entradaProducto
+      ),
+      idRazon_razon: Number(idRazon_razon),
+      fechaSalida: new Date(fechaSalida),
+      cantidadSalida: Number(cantidadSalida),
     })
 
     res.status(201).json({
-      idSalidaProducto: nuevaSalida.idSalidaProducto,
-      idUsuario_usuario: nuevaSalida.idUsuario_usuario,
-      idEntradaProducto_entradaProducto:
-        nuevaSalida.idEntradaProducto_entradaProducto,
-      idRazon_razon: nuevaSalida.idRazon_razon,
-      fechaSalida: nuevaSalida.fechaSalida.toISOString().split('T')[0], // "año mes dia"
+      success: true,
+      message: 'Salida creada correctamente',
+      data: nuevaSalida,
     })
   } catch (error) {
     console.error('Error al crear salida:', error)
-    res.status(500).json({ error: 'Error al crear la salida' })
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error interno del servidor',
+    })
   }
 }

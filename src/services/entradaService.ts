@@ -25,7 +25,7 @@ export async function CrearEntrada({ entrada, productos }: CrearEntradaProps) {
             idProducto_producto: producto.idProducto,
             idUnidad_unidad: producto.idUnidad,
             fechaEstimada: new Date(producto.fechaEstimada),
-            cantidad: producto.cantidad,
+            cantidad: Number(producto.cantidad),
           },
         })
 
@@ -50,7 +50,7 @@ export async function CrearEntrada({ entrada, productos }: CrearEntradaProps) {
             data: {
               idProducto_producto: producto.idProducto,
               idUnidad_unidad: producto.idUnidad,
-              cantidadTotal: producto.cantidad,
+              cantidadTotal: Number(producto.cantidad),
               fechaFinal: new Date(producto.fechaEstimada),
             },
           })
