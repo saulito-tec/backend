@@ -1,32 +1,17 @@
-import prisma from '../config/db.js'
-import bcrypt from 'bcrypt'
-
-const sanitizeUsuario = (u) => ({
-  idUsuario: u.idUsuario,
-  nombreUsuario: u.nombreUsuario,
-  apellidoPaterno: u.apellidoPaterno,
-  apellidoMaterno: u.apellidoMaterno,
-  permisoUsuario: u.permisoUsuario,
-})
+import {
+  getAllUsuariosService,
+  getUsuarioByIdService,
+  createUsuarioService,
+  updateUsuarioService,
+  deleteUsuarioService,
+} from '../services/usuarioService.ts'
 
 export const getAllUsuarios = async (req, res) => {
   try {
-    const data = await prisma.usuario.findMany({
-      select: {
-        idUsuario: true,
-        nombreUsuario: true,
-        apellidoPaterno: true,
-        apellidoMaterno: true,
-        permisoUsuario: true,
-      },
-    })
-    res.json(data.map(sanitizeUsuario))
+    const usuarios = await getAllUsuariosService()
+    res.json({ success: true, data: usuarios })
   } catch (error) {
-    console.error('Error al obtener los usuarios:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    })
+    console.error('Error al obtener usuarios:', error)
     res
       .status(500)
       .json({ success: false, message: 'Error interno del servidor' })
@@ -35,30 +20,16 @@ export const getAllUsuarios = async (req, res) => {
 
 export const getUsuarioById = async (req, res) => {
   try {
-    const { id } = req.params
-    const u = await prisma.usuario.findFirst({
-      where: { idUsuario: Number(id) },
-      select: {
-        idUsuario: true,
-        nombreUsuario: true,
-        apellidoPaterno: true,
-        apellidoMaterno: true,
-        permisoUsuario: true,
-      },
-    })
-
-    if (!u) {
+    const id = Number(req.params.id)
+    const usuario = await getUsuarioByIdService(id)
+    if (!usuario)
       return res
         .status(404)
         .json({ success: false, message: 'Usuario no encontrado' })
-    }
-    res.json(sanitizeUsuario(u))
+
+    res.json({ success: true, data: usuario })
   } catch (error) {
-    console.error('Error al obtener el usuario:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    })
+    console.error('Error al obtener usuario:', error)
     res
       .status(500)
       .json({ success: false, message: 'Error interno del servidor' })
@@ -67,66 +38,42 @@ export const getUsuarioById = async (req, res) => {
 
 export const createUsuario = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      })
-    }
     const {
       nombreUsuario,
       apellidoPaterno,
       apellidoMaterno,
       permisoUsuario,
-      hashPassword,
+      password,
     } = req.body
 
     if (
       !nombreUsuario ||
       !apellidoPaterno ||
       !apellidoMaterno ||
-      permisoUsuario === undefined ||
-      permisoUsuario === null ||
-      !hashPassword
+      !permisoUsuario ||
+      !password
     ) {
       return res.status(400).json({
         success: false,
-        message:
-          'nombreUsuario, apellidoPaterno, apellidoMaterno, permisoUsuario y hashPassword son requeridos',
+        message: 'Todos los campos son requeridos',
       })
     }
 
-    // Hash the password and store in hashPassword field
-    const hashedPassword = await bcrypt.hash(hashPassword, 10)
-
-    const created = await prisma.usuario.create({
-      data: {
-        nombreUsuario,
-        apellidoPaterno,
-        apellidoMaterno,
-        permisoUsuario: Number(permisoUsuario),
-        hashPassword: hashedPassword, // Use the hashed password
-      },
-      select: {
-        idUsuario: true,
-        nombreUsuario: true,
-        apellidoPaterno: true,
-        apellidoMaterno: true,
-        permisoUsuario: true,
-      },
+    const nuevoUsuario = await createUsuarioService({
+      nombreUsuario,
+      apellidoPaterno,
+      apellidoMaterno,
+      permisoUsuario: Number(permisoUsuario),
+      password,
     })
 
     res.status(201).json({
       success: true,
       message: 'Usuario creado exitosamente',
-      usuario: sanitizeUsuario(created),
+      data: nuevoUsuario,
     })
   } catch (error) {
-    console.error('Error al crear el usuario:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    })
+    console.error('Error al crear usuario:', error)
     res
       .status(500)
       .json({ success: false, message: 'Error interno del servidor' })
@@ -135,76 +82,31 @@ export const createUsuario = async (req, res) => {
 
 export const updateUsuario = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se recibió cuerpo en la solicitud (req.body vacío)',
-      })
-    }
-    const { id } = req.params
+    const idUsuario = Number(req.params.id)
     const {
       nombreUsuario,
       apellidoPaterno,
       apellidoMaterno,
       permisoUsuario,
-      hashPassword, // opcional en update
+      password,
     } = req.body
 
-    if (
-      !id ||
-      !nombreUsuario ||
-      !apellidoPaterno ||
-      !apellidoMaterno ||
-      permisoUsuario === undefined ||
-      permisoUsuario === null
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'id, nombreUsuario, apellidoPaterno, apellidoMaterno y permisoUsuario son requeridos',
-      })
-    }
-
-    const dataToUpdate = {
+    const usuarioActualizado = await updateUsuarioService({
+      idUsuario,
       nombreUsuario,
       apellidoPaterno,
       apellidoMaterno,
-      permisoUsuario: Number(permisoUsuario),
-    }
-
-    // Hash password if provided and store in hashPassword field AGUASSSS
-    if (hashPassword) {
-      dataToUpdate.hashPassword = await bcrypt.hash(hashPassword, 10)
-    }
-
-    const updated = await prisma.usuario.update({
-      where: { idUsuario: Number(id) },
-      data: dataToUpdate,
-      select: {
-        idUsuario: true,
-        nombreUsuario: true,
-        apellidoPaterno: true,
-        apellidoMaterno: true,
-        permisoUsuario: true,
-      },
+      permisoUsuario,
+      password,
     })
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Usuario actualizado exitosamente',
-      usuario: sanitizeUsuario(updated),
+      message: 'Usuario actualizado correctamente',
+      data: usuarioActualizado,
     })
   } catch (error) {
-    if (error?.code === 'P2025') {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Usuario no encontrado' })
-    }
-    console.error('Error al actualizar el usuario:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    })
+    console.error('Error al actualizar usuario:', error)
     res
       .status(500)
       .json({ success: false, message: 'Error interno del servidor' })
@@ -213,29 +115,11 @@ export const updateUsuario = async (req, res) => {
 
 export const deleteUsuario = async (req, res) => {
   try {
-    const { id } = req.params
-    if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'idUsuario es requerido' })
-    }
-
-    await prisma.usuario.delete({ where: { idUsuario: Number(id) } })
-
-    res
-      .status(200)
-      .json({ success: true, message: 'Usuario eliminado exitosamente' })
+    const id = Number(req.params.id)
+    await deleteUsuarioService(id)
+    res.json({ success: true, message: 'Usuario eliminado correctamente' })
   } catch (error) {
-    if (error?.code === 'P2025') {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Usuario no encontrado' })
-    }
-    console.error('Error al eliminar el usuario:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    })
+    console.error('Error al eliminar usuario:', error)
     res
       .status(500)
       .json({ success: false, message: 'Error interno del servidor' })
