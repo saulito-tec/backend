@@ -11,6 +11,12 @@ export async function getAllProductosService(): Promise<IProducto[]> {
       idProducto: true,
       nombreProducto: true,
       idDepartamento_departamento: true,
+      departamento: {
+        select: {
+          idDepartamento: true,
+          nombreDepartamento: true,
+        },
+      },
     },
     orderBy: { idProducto: 'asc' },
   })
@@ -26,6 +32,12 @@ export async function getProductoByIdService(
       idProducto: true,
       nombreProducto: true,
       idDepartamento_departamento: true,
+      departamento: {
+        select: {
+          idDepartamento: true,
+          nombreDepartamento: true,
+        },
+      },
     },
   })
   return producto
@@ -38,6 +50,17 @@ export async function createProductoService(
     data: {
       nombreProducto: data.nombreProducto,
       idDepartamento_departamento: data.idDepartamento_departamento,
+    },
+    select: {
+      idProducto: true,
+      nombreProducto: true,
+      idDepartamento_departamento: true,
+      departamento: {
+        select: {
+          idDepartamento: true,
+          nombreDepartamento: true,
+        },
+      },
     },
   })
   return producto
@@ -52,6 +75,17 @@ export async function updateProductoService(
     data: {
       nombreProducto: data.nombreProducto,
       idDepartamento_departamento: data.idDepartamento_departamento,
+    },
+    select: {
+      idProducto: true,
+      nombreProducto: true,
+      idDepartamento_departamento: true,
+      departamento: {
+        select: {
+          idDepartamento: true,
+          nombreDepartamento: true,
+        },
+      },
     },
   })
   return producto
