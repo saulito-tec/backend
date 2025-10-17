@@ -2,6 +2,10 @@ export interface IProducto {
   idProducto: number
   nombreProducto: string
   idDepartamento_departamento: number
+  departamento?: {
+    idDepartamento: number
+    nombreDepartamento: string
+  }
 }
 
 export interface ICreateProductoRequest {
