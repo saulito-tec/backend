@@ -17,3 +17,8 @@ export interface IUpdateProductoRequest {
   nombreProducto: string
   idDepartamento_departamento: number
 }
+
+export interface IDepartamento {
+  idDepartamento: number
+  nombreDepartamento: string
+}

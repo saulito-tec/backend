@@ -3,6 +3,7 @@ import type {
   IProducto,
   ICreateProductoRequest,
   IUpdateProductoRequest,
+  IDepartamento,
 } from '../valueObjects/productoVO.js'
 
 export async function getAllProductosService(): Promise<IProducto[]> {
@@ -95,4 +96,15 @@ export async function deleteProductoService(id: number): Promise<void> {
   await prisma.producto.delete({
     where: { idProducto: id },
   })
+}
+
+export async function getAllCategoriesService(): Promise<IDepartamento[]> {
+  try {
+    const departamentos = await prisma.departamento.findMany()
+    console.log(departamentos)
+    return departamentos
+  } catch (error) {
+    console.error('Error al obtener los departamentos:', error)
+    throw new Error('No se pudieron obtener los departamentos')
+  }
 }
