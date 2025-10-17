@@ -4,6 +4,7 @@ import {
   createProductoService,
   updateProductoService,
   deleteProductoService,
+  getAllCategoriesService,
 } from '../services/productoService.ts'
 
 export const getAllProductos = async (req, res) => {
@@ -139,6 +140,31 @@ export const deleteProducto = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
+    })
+  }
+}
+
+export const getCategorias = async (req, res) => {
+  try {
+    const categories = await getAllCategoriesService()
+
+    if (!categories || categories.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No se encontraron categorias',
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      data: categories,
+    })
+  } catch (e) {
+    console.error('Error al obtener las categorias ', e)
+    return res.status(404).json({
+      success: false,
+      message: 'No se encontraron productos',
     })
   }
 }

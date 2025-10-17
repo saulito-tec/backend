@@ -5,12 +5,15 @@ import {
   createProducto,
   updateProducto,
   deleteProducto,
+  getCategorias,
 } from '../controllers/productos.controller.js'
 
 const router = Router()
 
 // GET /api/productos
 router.get('/', getAllProductos)
+//GET /api/productos/categorias
+router.get('/categorias', getCategorias)
 // GET /api/productos/:id
 router.get('/:id', getProductoById)
 
