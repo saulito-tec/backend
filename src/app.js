@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
+import { swaggerDocs } from './config/swagger.js'
 
 // Importar rutas
 
@@ -29,6 +30,9 @@ app.use('/api/inventario', inventarioRoutes)
 app.use('/api/salidas', salidasRoutes)
 app.use('/api/entradas', entradasRoutes)
 app.use('/api/reportes', reportesRoutes)
+
+// Swagger
+swaggerDocs(app)
 
 // Ruta base de prueba
 app.get('/', (req, res) => {
