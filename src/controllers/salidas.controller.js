@@ -39,31 +39,36 @@ export const getSalidaById = async (req, res) => {
 
 export const createSalida = async (req, res) => {
   try {
-    const {
-      idUsuario_usuario,
-      idEntradaProducto_entradaProducto,
-      idRazon_razon,
-      fechaSalida,
-      cantidadSalida,
-    } = req.body
+    const { idUsuario, idRazon, fechaSalida, productos } = req.body
 
-    const nuevaSalida = await CrearSalida({
-      idUsuario_usuario: Number(idUsuario_usuario),
-      idEntradaProducto_entradaProducto: Number(
-        idEntradaProducto_entradaProducto
-      ),
-      idRazon_razon: Number(idRazon_razon),
+    if (!idUsuario || !idRazon || !fechaSalida || !productos) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Faltan campos obligatorios: idUsuario, idRazon, fechaSalida o productos',
+      })
+    }
+
+    const salida = {
+      idUsuario,
+      idRazon,
       fechaSalida: new Date(fechaSalida),
-      cantidadSalida: Number(cantidadSalida),
-    })
+    }
+
+    const productosSalida = productos.map((p) => ({
+      idProducto: Number(p.idProducto),
+      cantidad: Number(p.cantidad),
+    }))
+
+    const resultado = await CrearSalida({ salida, productos: productosSalida })
 
     res.status(201).json({
       success: true,
       message: 'Salida creada correctamente',
-      data: nuevaSalida,
+      productosActualizados: resultado,
     })
   } catch (error) {
-    console.error('Error al crear salida:', error)
+    console.error('Error al crear la salida:', error)
     res.status(500).json({
       success: false,
       message: error.message || 'Error interno del servidor',

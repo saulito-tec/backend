@@ -16,6 +16,48 @@ const router = Router()
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     ProductoSalida:
+ *       type: object
+ *       required:
+ *         - idProducto
+ *         - cantidad
+ *       properties:
+ *         idProducto:
+ *           type: integer
+ *           description: ID del producto al que se le da salida
+ *           example: 1
+ *         cantidad:
+ *           type: number
+ *           description: Cantidad que se está dando de salida
+ *           example: 3
+ *
+ *     SalidaProducto:
+ *       type: object
+ *       properties:
+ *         idSalidaProducto:
+ *           type: integer
+ *           example: 1
+ *         idUsuario:
+ *           type: integer
+ *           example: 1
+ *         idRazon:
+ *           type: integer
+ *           example: 2
+ *         fechaSalida:
+ *           type: string
+ *           format: date
+ *           example: "2025-10-30"
+ *         idEntradaProducto:
+ *           type: integer
+ *           example: 5
+ *         producto:
+ *           $ref: '#/components/schemas/ProductoSalida'
+ */
+
+/**
+ * @swagger
  * /salidas:
  *   get:
  *     summary: Obtener todas las salidas registradas
@@ -34,7 +76,7 @@ const router = Router()
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Salida'
+ *                     $ref: '#/components/schemas/SalidaProducto'
  *       500:
  *         description: Error interno del servidor
  */
@@ -44,13 +86,13 @@ router.get('/', getAllSalidas)
  * @swagger
  * /salidas/{id}:
  *   get:
- *     summary: Obtener una salida por su ID
+ *     summary: Obtener una salida específica por su ID
  *     tags: [Salidas]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID de la salida
+ *         description: ID de la salidaProducto
  *         schema:
  *           type: integer
  *           example: 1
@@ -66,7 +108,7 @@ router.get('/', getAllSalidas)
  *                   type: boolean
  *                   example: true
  *                 data:
- *                   $ref: '#/components/schemas/Salida'
+ *                   $ref: '#/components/schemas/SalidaProducto'
  *       404:
  *         description: Salida no encontrada
  *       500:
@@ -78,7 +120,7 @@ router.get('/:id', getSalidaById)
  * @swagger
  * /salidas:
  *   post:
- *     summary: Crear una nueva salida
+ *     summary: Registrar una nueva salida de productos
  *     tags: [Salidas]
  *     requestBody:
  *       required: true
@@ -87,44 +129,45 @@ router.get('/:id', getSalidaById)
  *           schema:
  *             type: object
  *             required:
- *               - idUsuario_usuario
- *               - idEntradaProducto_entradaProducto
- *               - idRazon_razon
+ *               - idUsuario
+ *               - idRazon
  *               - fechaSalida
- *               - cantidadSalida
+ *               - productos
  *             properties:
- *               idUsuario_usuario:
+ *               idUsuario:
  *                 type: integer
+ *                 description: ID del usuario que realiza la salida
  *                 example: 1
- *               idEntradaProducto_entradaProducto:
+ *               idRazon:
  *                 type: integer
- *                 example: 2
- *               idRazon_razon:
- *                 type: integer
- *                 example: 3
+ *                 description: ID de la razón de salida
+ *                 example: 1
  *               fechaSalida:
  *                 type: string
- *                 format: date-time
- *                 example: "2025-10-16T00:00:00.000Z"
- *               cantidadSalida:
- *                 type: number
- *                 example: 15
+ *                 format: date
+ *                 example: "2025-10-30"
+ *               productos:
+ *                 type: array
+ *                 description: Lista de productos que se están dando de salida
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - idProducto
+ *                     - cantidad
+ *                   properties:
+ *                     idProducto:
+ *                       type: integer
+ *                       description: ID del producto
+ *                       example: 1
+ *                     cantidad:
+ *                       type: number
+ *                       description: Cantidad que se retira del inventario
+ *                       example: 3
  *     responses:
  *       201:
- *         description: Salida creada correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Salida creada correctamente
- *                 data:
- *                   $ref: '#/components/schemas/Salida'
+ *         description: Salida(s) creada(s) correctamente
+ *       400:
+ *         description: Datos faltantes o inválidos
  *       500:
  *         description: Error interno del servidor
  */
