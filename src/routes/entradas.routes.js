@@ -137,8 +137,8 @@ router.get('/:id', getEntradaById)
  *                 type: string
  *                 example: "Proveedor X"
  *               compra:
- *                 type: string
- *                 example: "Compra #12345"
+ *                 type: int
+ *                 example: 0
  *               productos:
  *                 type: array
  *                 description: Lista de productos incluidos en la entrada
@@ -155,7 +155,7 @@ router.get('/:id', getEntradaById)
  *                       example: 1
  *                     idUnidad:
  *                       type: integer
- *                       example: 3
+ *                       example: 1
  *                     fechaEstimada:
  *                       type: string
  *                       format: date

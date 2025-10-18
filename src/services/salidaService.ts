@@ -1,72 +1,77 @@
 import prisma from '../config/db.js'
-import { Prisma } from '../generated/prisma/index.js'
-import type { ISalida, ISalidaResponse } from '../valueObjects/salidaVO.ts'
+import type { ISalida, ISalidaProducto } from '../valueObjects/salidaVO.ts'
 
-export async function CrearSalida(data: ISalida): Promise<ISalidaResponse> {
-  const {
-    idUsuario_usuario,
-    idEntradaProducto_entradaProducto,
-    idRazon_razon,
-    fechaSalida,
-    cantidadSalida,
-  } = data
+interface CrearSalidaProps {
+  salida: ISalida
+  productos: ISalidaProducto[]
+}
 
-  if (!cantidadSalida && cantidadSalida !== 0)
-    throw new Error('Debe especificar la cantidadSalida')
+export async function CrearSalida({ salida, productos }: CrearSalidaProps) {
+  if (!productos || productos.length === 0) {
+    throw new Error('Debes incluir al menos un producto en la salida')
+  }
 
   return await prisma.$transaction(async (tx) => {
-    const entradaProducto = await tx.entradaProducto.findUnique({
-      where: { idEntradaProducto: idEntradaProducto_entradaProducto },
-      select: {
-        idProducto_producto: true,
-        idUnidad_unidad: true,
-      },
-    })
+    const resultados = []
 
-    if (!entradaProducto) throw new Error('EntradaProducto no encontrada')
+    for (const producto of productos) {
+      const ultimaEntrada = await tx.entradaProducto.findFirst({
+        where: { idProducto_producto: producto.idProducto },
+        orderBy: { idEntradaProducto: 'desc' },
+      })
 
-    const { idProducto_producto, idUnidad_unidad } = entradaProducto
+      if (!ultimaEntrada) {
+        throw new Error(
+          `No se encontró una entrada previa para el producto con id ${producto.idProducto}`
+        )
+      }
 
-    const inventario = await tx.inventario.findFirst({
-      where: { idProducto_producto, idUnidad_unidad },
-    })
+      await tx.salidaProducto.create({
+        data: {
+          idUsuario_usuario: salida.idUsuario,
+          idEntradaProducto_entradaProducto: ultimaEntrada.idEntradaProducto,
+          idRazon_razon: salida.idRazon,
+          fechaSalida: salida.fechaSalida,
+        },
+      })
 
-    if (!inventario)
-      throw new Error('No existe inventario para el producto especificado')
+      const inventario = await tx.inventario.findFirst({
+        where: {
+          idProducto_producto: producto.idProducto,
+          idUnidad_unidad: ultimaEntrada.idUnidad_unidad,
+        },
+      })
 
-    const cantidadActual = (inventario.cantidadTotal as any)?.toNumber
-      ? (inventario.cantidadTotal as any).toNumber()
-      : Number(inventario.cantidadTotal)
+      if (!inventario) {
+        throw new Error(
+          `No existe inventario registrado para el producto con id ${producto.idProducto}`
+        )
+      }
 
-    if (isNaN(cantidadActual))
-      throw new Error('Error interno: cantidadTotal no es numérica')
+      const cantidadFinal =
+        Number(inventario.cantidadTotal) - Number(producto.cantidad)
 
-    if (cantidadActual < cantidadSalida)
-      throw new Error('Cantidad insuficiente en inventario')
+      if (cantidadFinal < 0) {
+        throw new Error(
+          `Cantidad insuficiente en inventario para el producto con id ${producto.idProducto}`
+        )
+      }
 
-    const nuevaSalida = await tx.salidaProducto.create({
-      data: {
-        idUsuario_usuario,
-        idEntradaProducto_entradaProducto,
-        idRazon_razon,
-        fechaSalida: new Date(fechaSalida),
-      },
-    })
+      const inventarioActualizado = await tx.inventario.update({
+        where: { idInventario: inventario.idInventario },
+        data: {
+          cantidadTotal: cantidadFinal,
+          fechaFinal: salida.fechaSalida,
+        },
+      })
 
-    const nuevaCantidad = cantidadActual - Number(cantidadSalida)
-
-    await tx.inventario.update({
-      where: { idInventario: inventario.idInventario },
-      data: {
-        cantidadTotal: new Prisma.Decimal(nuevaCantidad),
-        fechaFinal: new Date(fechaSalida),
-      },
-    })
-
-    return {
-      ...nuevaSalida,
-      cantidadSalida,
+      resultados.push({
+        idProducto: producto.idProducto,
+        cantidadFinal: Number(inventarioActualizado.cantidadTotal),
+      })
     }
+
+    return resultados
   })
 }
 
