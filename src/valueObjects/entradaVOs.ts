@@ -11,4 +11,5 @@ export interface IEntradaProducto {
   idUnidad: number
   fechaEstimada: Date
   cantidad: number
+  unidad?: string | number
 }

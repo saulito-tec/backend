@@ -12,6 +12,7 @@ import inventarioRoutes from './routes/inventario.routes.js'
 import salidasRoutes from './routes/salidas.routes.js'
 import entradasRoutes from './routes/entradas.routes.js'
 import reportesRoutes from './routes/reportes.routes.js'
+import unidadesRoutes from './routes/unidades.routes.js'
 
 const app = express()
 
@@ -30,6 +31,7 @@ app.use('/api/inventario', inventarioRoutes)
 app.use('/api/salidas', salidasRoutes)
 app.use('/api/entradas', entradasRoutes)
 app.use('/api/reportes', reportesRoutes)
+app.use('/api/unidades', unidadesRoutes)
 
 // Swagger
 swaggerDocs(app)
