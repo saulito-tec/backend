@@ -106,3 +106,34 @@ export async function ObtenerEntradaPorId(idEntrada: number) {
     },
   })
 }
+
+export const getEntradasDeProducto = async (
+  idProducto: number,
+  limit: number
+) => {
+  try {
+    const entradas = await prisma.entradaProducto.findMany({
+      where: {
+        idProducto_producto: Number(idProducto),
+      },
+      orderBy: {
+        entrada: {
+          fechaEntrada: 'desc',
+        },
+      },
+      take: Number(limit),
+      include: {
+        entrada: {
+          select: {
+            fechaEntrada: true,
+          },
+        },
+      },
+    })
+
+    return entradas
+  } catch (error) {
+    console.error('Error al obtener entradas del producto:', error)
+    throw error
+  }
+}

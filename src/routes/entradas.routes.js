@@ -3,6 +3,7 @@ import {
   getEntradaById,
   getAllEntradas,
   createEntrada,
+  getAllEntradasById,
 } from '../controllers/entradas.controller.js'
 
 const router = Router()
@@ -105,6 +106,69 @@ router.get('/', getAllEntradas)
  *         description: Error interno del servidor
  */
 router.get('/:id', getEntradaById)
+
+/**
+ * @swagger
+ * /entradas/producto/{id}:
+ *   get:
+ *     summary: Obtiene las últimas entradas registradas para un producto
+ *     description: >
+ *       Retorna las últimas *n* entradas (`limit`) registradas en la tabla `entradaProducto`
+ *       asociadas a un producto específico, ordenadas por el ID de entrada descendente.
+ *     tags:
+ *       - Entradas
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 5
+ *         description: ID del producto a consultar
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 2
+ *         description: Número máximo de registros a devolver
+ *     responses:
+ *       200:
+ *         description: Lista de entradas obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               count: 2
+ *               data:
+ *                 - idEntradaProducto: 26
+ *                   idEntrada_entrada: 42
+ *                   idProducto_producto: 5
+ *                   idUnidad_unidad: 2
+ *                   fechaEstimada: "2025-10-19T04:48:46.000Z"
+ *                   cantidad: 1.000
+ *                 - idEntradaProducto: 25
+ *                   idEntrada_entrada: 41
+ *                   idProducto_producto: 5
+ *                   idUnidad_unidad: 2
+ *                   fechaEstimada: "2025-10-19T03:05:29.000Z"
+ *                   cantidad: 10.000
+ *       400:
+ *         description: Parámetros inválidos o faltantes
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "El parámetro 'id' es requerido."
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "Error interno del servidor"
+ */
+router.get('/producto/:id', getAllEntradasById)
 
 /**
  * @swagger

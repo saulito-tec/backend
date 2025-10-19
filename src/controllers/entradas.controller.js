@@ -2,6 +2,7 @@ import {
   CrearEntrada,
   ObtenerEntradaPorId,
   ObtenerEntradas,
+  getEntradasDeProducto,
 } from '../services/entradaService.ts'
 
 export const getAllEntradas = async (req, res) => {
@@ -80,6 +81,27 @@ export const createEntrada = async (req, res) => {
     })
   } catch (error) {
     console.error('Error al crear la entrada:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    })
+  }
+}
+
+export const getAllEntradasById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { limit = 5 } = req.query
+
+    const entradas = await getEntradasDeProducto(id, limit)
+
+    res.status(200).json({
+      success: true,
+      count: entradas.length,
+      data: entradas,
+    })
+  } catch (error) {
+    console.error('Error al obtener las entradas:', error)
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
