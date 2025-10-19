@@ -70,6 +70,7 @@ model producto {
   idProducto                  Int               @id @default(autoincrement())
   nombreProducto              String            @db.VarChar(120)
   idDepartamento_departamento Int
+  emoji                       String?           @db.VarChar(10)
   entradaProducto             entradaProducto[]
   inventario                  inventario[]
   departamento                departamento      @relation(fields: [idDepartamento_departamento], references: [idDepartamento], onDelete: NoAction, onUpdate: NoAction, map: "producto_ibfk_1")

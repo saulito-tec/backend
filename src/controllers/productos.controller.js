@@ -59,7 +59,12 @@ export const getProductoById = async (req, res) => {
 
 export const createProducto = async (req, res) => {
   try {
-    const { nombreProducto, idDepartamento_departamento } = req.body
+    const {
+      nombreProducto,
+      idDepartamento_departamento,
+      emoji,
+      idUnidad_unidad,
+    } = req.body
 
     if (!nombreProducto || !idDepartamento_departamento) {
       return res.status(400).json({
@@ -71,6 +76,8 @@ export const createProducto = async (req, res) => {
     const producto = await createProductoService({
       nombreProducto,
       idDepartamento_departamento,
+      emoji: emoji ?? '📦',
+      idUnidad_unidad,
     })
 
     res.status(201).json({
@@ -90,7 +97,7 @@ export const createProducto = async (req, res) => {
 export const updateProducto = async (req, res) => {
   try {
     const id = parseInt(req.params.id)
-    const { nombreProducto, idDepartamento_departamento } = req.body
+    const { nombreProducto, idDepartamento_departamento, emoji } = req.body
 
     if (!id || !nombreProducto || !idDepartamento_departamento) {
       return res.status(400).json({
@@ -103,6 +110,7 @@ export const updateProducto = async (req, res) => {
     const producto = await updateProductoService(id, {
       nombreProducto,
       idDepartamento_departamento,
+      emoji: emoji ?? '📦',
     })
 
     res.status(200).json({

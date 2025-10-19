@@ -19,6 +19,37 @@ const router = Router()
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Producto:
+ *       type: object
+ *       properties:
+ *         idProducto:
+ *           type: integer
+ *           example: 1
+ *         nombreProducto:
+ *           type: string
+ *           example: "Detergente Ariel"
+ *         emoji:
+ *           type: string
+ *           nullable: true
+ *           example: "🧴"
+ *         idDepartamento_departamento:
+ *           type: integer
+ *           example: 2
+ *         departamento:
+ *           type: object
+ *           properties:
+ *             idDepartamento:
+ *               type: integer
+ *               example: 2
+ *             nombreDepartamento:
+ *               type: string
+ *               example: "Limpieza"
+ */
+
+/**
+ * @swagger
  * /productos:
  *   get:
  *     summary: Obtiene la lista de todos los productos
@@ -141,6 +172,14 @@ router.get('/:id', getProductoById)
  *               idDepartamento_departamento:
  *                 type: integer
  *                 example: 2
+ *               idUnidad_unidad:
+ *                 type: integer
+ *                 example: 5
+ *                 description: ID de la unidad asociada al inventario (opcional)
+ *               emoji:
+ *                 type: string
+ *                 example: "🧴"
+ *                 description: Emoji representativo del producto (opcional)
  *     responses:
  *       201:
  *         description: Producto creado exitosamente
@@ -183,9 +222,6 @@ router.post('/', createProducto)
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - nombreProducto
- *               - idDepartamento_departamento
  *             properties:
  *               nombreProducto:
  *                 type: string
@@ -193,6 +229,10 @@ router.post('/', createProducto)
  *               idDepartamento_departamento:
  *                 type: integer
  *                 example: 1
+ *               emoji:
+ *                 type: string
+ *                 example: "🧽"
+ *                 description: Emoji representativo del producto (opcional)
  *     responses:
  *       200:
  *         description: Producto actualizado correctamente
