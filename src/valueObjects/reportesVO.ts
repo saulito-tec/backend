@@ -11,9 +11,12 @@ export interface IReportePorMes {
 
 export interface IReportePorDia {
   cantidad: number
+  unidad: string
   producto: string
   categoria: string
-  fechaEntrada: Date
+  fechaEntrada?: Date
+  fechaSalida?: Date
+  razon?: string
 }
 
 export interface IReporteParams {
