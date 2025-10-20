@@ -11,6 +11,7 @@ export async function getAllProductosService(): Promise<IProducto[]> {
     select: {
       idProducto: true,
       nombreProducto: true,
+      emoji: true,
       idDepartamento_departamento: true,
       departamento: {
         select: {
@@ -32,6 +33,7 @@ export async function getProductoByIdService(
     select: {
       idProducto: true,
       nombreProducto: true,
+      emoji: true,
       idDepartamento_departamento: true,
       departamento: {
         select: {
@@ -47,24 +49,39 @@ export async function getProductoByIdService(
 export async function createProductoService(
   data: ICreateProductoRequest
 ): Promise<IProducto> {
-  const producto = await prisma.producto.create({
-    data: {
-      nombreProducto: data.nombreProducto,
-      idDepartamento_departamento: data.idDepartamento_departamento,
-    },
-    select: {
-      idProducto: true,
-      nombreProducto: true,
-      idDepartamento_departamento: true,
-      departamento: {
-        select: {
-          idDepartamento: true,
-          nombreDepartamento: true,
+  return await prisma.$transaction(async (tx) => {
+    const producto = await tx.producto.create({
+      data: {
+        nombreProducto: data.nombreProducto,
+        idDepartamento_departamento: data.idDepartamento_departamento,
+        emoji: data.emoji || '📦',
+      },
+      select: {
+        idProducto: true,
+        nombreProducto: true,
+        idDepartamento_departamento: true,
+        emoji: true,
+        departamento: {
+          select: {
+            idDepartamento: true,
+            nombreDepartamento: true,
+          },
         },
       },
-    },
+    })
+
+    console.log('PRODUCTO: ', producto)
+    await tx.inventario.create({
+      data: {
+        idProducto_producto: producto.idProducto,
+        cantidadTotal: 0,
+        idUnidad_unidad: data.idUnidad_unidad ?? 5,
+        fechaFinal: new Date(),
+      },
+    })
+
+    return producto
   })
-  return producto
 }
 
 export async function updateProductoService(
@@ -76,11 +93,13 @@ export async function updateProductoService(
     data: {
       nombreProducto: data.nombreProducto,
       idDepartamento_departamento: data.idDepartamento_departamento,
+      emoji: data.emoji,
     },
     select: {
       idProducto: true,
       nombreProducto: true,
       idDepartamento_departamento: true,
+      emoji: true,
       departamento: {
         select: {
           idDepartamento: true,
