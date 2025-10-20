@@ -2,6 +2,7 @@ import {
   CrearSalida,
   ObtenerSalidas,
   ObtenerSalidaPorId,
+  ObtenerRazones,
 } from '../services/salidaService.ts'
 
 export const getAllSalidas = async (req, res) => {
@@ -72,6 +73,19 @@ export const createSalida = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Error interno del servidor',
+    })
+  }
+}
+
+export const getAllRazones = async (req, res) => {
+  try {
+    const razones = await ObtenerRazones()
+    res.json({ success: true, data: razones })
+  } catch (error) {
+    console.error('Error al obtener razones:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
     })
   }
 }

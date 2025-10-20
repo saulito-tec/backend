@@ -3,6 +3,7 @@ import {
   getAllSalidas,
   getSalidaById,
   createSalida,
+  getAllRazones,
 } from '../controllers/salidas.controller.js'
 
 const router = Router()
@@ -81,6 +82,47 @@ const router = Router()
  *         description: Error interno del servidor
  */
 router.get('/', getAllSalidas)
+
+/**
+ * @swagger
+ * /salidas/razones:
+ *   get:
+ *     summary: Obtiene la lista de razones de salida de productos
+ *     tags: [Salidas]
+ *     responses:
+ *       200:
+ *         description: Lista de razones obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/RazonSalida'
+ *       500:
+ *         description: Error interno del servidor
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RazonSalida:
+ *       type: object
+ *       properties:
+ *         idRazon:
+ *           type: integer
+ *           example: 1
+ *         razon:
+ *           type: string
+ *           example: "Merma"
+ */
+router.get('/razones', getAllRazones)
 
 /**
  * @swagger
