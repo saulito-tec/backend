@@ -1,5 +1,6 @@
 import prisma from '../config/db.js'
 import type { ISalida, ISalidaProducto } from '../valueObjects/salidaVO.ts'
+import type { IRazonSalida } from '../valueObjects/razonVO.js'
 
 interface CrearSalidaProps {
   salida: ISalida
@@ -12,7 +13,7 @@ export async function CrearSalida({ salida, productos }: CrearSalidaProps) {
   }
 
   return await prisma.$transaction(async (tx) => {
-    const resultados = []
+    const resultados = [] as any
 
     for (const producto of productos) {
       const ultimaEntrada = await tx.entradaProducto.findFirst({
@@ -117,4 +118,19 @@ export async function ObtenerSalidaPorId(idSalida: number) {
       razon: true,
     },
   })
+}
+
+export async function ObtenerRazones(): Promise<IRazonSalida[]> {
+  const razones = await prisma.razon.findMany({
+    select: {
+      idRazon: true,
+      razon: true,
+    },
+    orderBy: { idRazon: 'asc' },
+  })
+
+  return razones.map((r) => ({
+    idRazon: r.idRazon,
+    razon: r.razon,
+  }))
 }
