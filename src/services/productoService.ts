@@ -70,7 +70,6 @@ export async function createProductoService(
       },
     })
 
-    console.log('PRODUCTO: ', producto)
     await tx.inventario.create({
       data: {
         idProducto_producto: producto.idProducto,
@@ -120,7 +119,6 @@ export async function deleteProductoService(id: number): Promise<void> {
 export async function getAllCategoriesService(): Promise<IDepartamento[]> {
   try {
     const departamentos = await prisma.departamento.findMany()
-    console.log(departamentos)
     return departamentos
   } catch (error) {
     console.error('Error al obtener los departamentos:', error)

@@ -1,5 +1,4 @@
 import prisma from '../config/db.js'
-import { startOfMonth, endOfMonth } from 'date-fns'
 import type {
   IReportePorAño,
   IReportePorMes,
@@ -25,7 +24,6 @@ export async function getReportesPorAñoService(): Promise<IReportePorAño[]> {
   const meses: Record<number, Set<string>> = {}
 
   const addFecha = (fecha: Date) => {
-    // Use UTC methods to avoid timezone shifts
     const year = fecha.getUTCFullYear()
     const month = fecha.toLocaleString('es-MX', {
       month: 'long',
@@ -52,7 +50,6 @@ export async function getReportesPorMesService(
   year: number,
   month: number
 ): Promise<{ count: number; data: IReportePorMes[] }> {
-  // Use UTC to avoid timezone issues
   const inicio = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0))
   const fin = new Date(Date.UTC(year, month, 1, 0, 0, 0))
 
@@ -91,8 +88,6 @@ export async function getReportesPorMesService(
   )
 
   operaciones.sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
-
-  // Return count for performance - frontend doesn't need to count
   return { count: operaciones.length, data: operaciones }
 }
 
@@ -103,13 +98,9 @@ export async function getDetalleEntradaService({
 }: IReporteParams): Promise<any> {
   if (!day) throw new Error('Día requerido para reporte de entrada.')
 
-  // Use UTC to avoid timezone issues
   const inicio = new Date(Date.UTC(year, month - 1, day, 0, 0, 0))
   const fin = new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0))
 
-  console.log('🔍 Querying entrada between:', inicio, 'and', fin)
-
-  // ✅ Query by entrada.fechaEntrada, not entradaProducto.fechaEstimada
   const entradas = await prisma.entrada.findMany({
     where: {
       fechaEntrada: { gte: inicio, lt: fin },
@@ -135,23 +126,19 @@ export async function getDetalleEntradaService({
     },
   })
 
-  console.log('✅ Found entradas:', entradas.length)
-
   if (entradas.length === 0) {
     return { usuario: null, data: [] }
   }
 
-  // Get usuario from first entrada
   const usuario = entradas[0].usuario
 
-  // Flatten all products from all entradas of this day
   const data: IReportePorDia[] = entradas.flatMap((entrada) =>
     entrada.entradaProducto.map((ep) => ({
       cantidad: Number(ep.cantidad),
       unidad: ep.unidad.unidad,
       producto: ep.producto.nombreProducto,
       categoria: ep.producto.departamento.nombreDepartamento,
-      fechaEntrada: entrada.fechaEntrada, // ✅ Use entrada date, not product expiration
+      fechaEntrada: entrada.fechaEntrada,
     }))
   )
 
@@ -165,11 +152,8 @@ export async function getDetalleSalidaService({
 }: IReporteParams): Promise<any> {
   if (!day) throw new Error('Día requerido para reporte de salida.')
 
-  // Use UTC to avoid timezone issues
   const inicio = new Date(Date.UTC(year, month - 1, day, 0, 0, 0))
   const fin = new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0))
-
-  console.log('🔍 Querying salida between:', inicio, 'and', fin)
 
   const salidas = await prisma.salidaProducto.findMany({
     where: {
@@ -200,8 +184,6 @@ export async function getDetalleSalidaService({
       },
     },
   })
-
-  console.log('✅ Found salidas:', salidas.length)
 
   if (salidas.length === 0) {
     return { usuario: null, data: [] }
