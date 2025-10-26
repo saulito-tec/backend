@@ -34,3 +34,6 @@ Thumbs.db
 /src/generated/prisma
 
 /src/generated/prisma
+
+# ── Stress testing ──
+k6/k6/
